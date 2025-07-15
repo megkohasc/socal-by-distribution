@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+
+<!-- README: THIS FILE IS SORTED BY DISTRIBUTION BASED IN SOUTHERN CALIFORNIA-->
+
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive California Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+    .legend {
+      background: white;
+      padding: 10px;
+      line-height: 1.5;
+      position: absolute;
+      bottom: 30px;
+      left: 10px;
+      z-index: 1000;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      font-family: Arial, sans-serif;
+    }
+    .legend h4 {
+      margin: 0 0 5px;
+    }
+    .legend ul li {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="legend">
+    <h4>Distribution:</h4>
+    <ul id="county-list" style="margin: 0; padding-left: 20px;"></ul>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([34.0, -118.25], 7);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Store Mapping
+    const countyCityData = {
+      
+        "ABC": [
+        { name: "ABC WHITTIER - FRANK", coords: [33.91727003572164, -118.04312176551576], color: "red" },
+        { name: "ABC ANAHEIM - FRANK", coords: [33.81117541732508, -117.89404738641242], color: "red" },
+        { name: "ABC MONROVIA - FRANK", coords: [34.108242402336714, -118.00701296835695], color: "red" },
+        { name: "ABC ONTARIO - FRANK", coords: [34.05672305518711, -117.67731001374659], color: "red" },
+        { name: "ABC LA - JACOB", coords: [34.01745625903378, -118.20926484978443], color: "red" },
+        { name: "ABC OXNARD - JACOB", coords: [34.2565439437123, -119.16395881057497], color: "red" },
+        { name: "ABC GARDENA - BRANDON", coords: [33.856713004737664, -118.28191801179422], color: "red" },
+        { name: "ABC LA MIRADA - BRANDON", coords: [33.88206925347275, -118.01344322704236], color: "red" },
+        { name: "ABC PALM DESERT - KAILA", coords: [33.798963534159896, -116.3802009202898], color: "red" },
+        { name: "ABC SAN DIEGO - ALEX", coords: [32.83543434123462, -117.16184443523142], color: "red" },
+        { name: "ABC EL CAJON - ALEX", coords: [32.798024456748585, -116.97282334704221], color: "red" },
+        { name: "ABC SAN MARCOS - ALEX", coords: [33.14335219384722, -117.15326909307619], color: "red" },
+        { name: "ABC GARDENA (182nd) - JUSTIN", coords: [33.870733467119415, -118.28252484590723], color: "red" },
+        { name: "ABC CHATSWORTH - DYLAN", coords: [34.24124523145087, -118.57172190809325], color: "red" },
+        { name: "ABC RIVERSIDE - CHRIS", coords: [33.994180691443084, -117.36607430635078], color: "red" },
+        { name: "ABC SAN BERNARDINO - CHRIS", coords: [34.07618801176381, -117.27570594993475], color: "red" },
+
+        ],
+      
+        "Beacon": [
+        { name: "BEACON PICO RIVERA - RENE", coords: [33.97198552053776, -118.11885330783373], color: "blue" },
+        { name: "BEACON ORANGE - RENE", coords: [33.798368962593955, -117.861458244301], color: "blue" },
+        { name: "BEACON SANTA ANA - RENE", coords: [33.71034808177012, -117.91363084614478], color: "blue" },
+        { name: "BEACON LONG BEACH - RENE", coords: [33.81406920129267, -118.17606524016703], color: "blue" },
+        { name: "BEACON ANAHEIM - RENE", coords: [33.85235561398197, -117.9187736134279], color: "blue" },
+        { name: "BEACON OXNARD - JACOB", coords: [34.229213729973004, -119.16891496065135], color: "blue" },
+        { name: "BEACON VISTA - KAILA", coords: [33.15182820501515, -117.23038564555002], color: "blue" },
+        { name: "BEACON SAN DIEGO - ALEX", coords: [32.83759177546331, -117.13583955871516], color: "blue" },
+        { name: "BEACON EL CAJON - ALEX", coords: [32.798168180399, -116.97402594716918], color: "blue" },
+        { name: "BEACON GARDENA - JUSTIN", coords: [33.902229491831704, -118.31124771807694], color: "blue" },
+        { name: "BEACON VAN NUYS - JUSTIN", coords: [34.214094161860174, -118.46436363887094], color: "blue" },
+        { name: "BEACON LOS ANGELES - JUSTIN", coords: [33.989793347977354, -118.29633936954274], color: "blue" },
+        { name: "BEACON ROSEMEAD - JUSTIN", coords: [34.0623870124969, -118.07999357938034], color: "blue" },
+        { name: "BEACON SUN VALLEY - DYLAN", coords: [34.24357949425157, -118.38843652691368], color: "blue" },
+        { name: "BEACON SAN BERNARDINO - CHRIS", coords: [34.07323119894079, -117.27813444736564], color: "blue" },
+        { name: "BEACON RIVERSIDE - CHRIS", coords: [33.98772768999759, -117.3608707361576], color: "blue" },
+        // BEACON? { name: "BEACON POWAY - ALEX", coords: [33.151649260329116, -117.23038818852004], color: "purple" },
+
+
+        ],
+
+        "SRS":[
+        { name: "SRS VISTA - KAILA", coords: [33.20703048619685, -117.25126817438357], color: "beige" },
+        { name: "SRS SAN DIEGO - ALEX", coords: [32.88254248211888, -117.19646433206589], color: "beige" },
+
+        ],
+
+        "RWC":[
+        { name: "RWC LAKE ELSINORE - BRANDON", coords: [33.68433821547334, -117.33345079396632], color: "black" },
+        { name: "RWC SAN MARCOS - KAILA", coords: [33.13806398623284, -117.19701564555054], color: "black" },
+        { name: "RWC PALM DESERT - KAILA", coords: [33.838786104532964, -116.50780433203204], color: "black" },
+        { name: "RWC SPRING VALLEY - ALEX", coords: [32.71558911511767, -117.0115648033488], color: "black" },
+        { name: "RWC PLACENTIA - CHRIS", coords: [33.865232265235264, -117.83334193505331], color: "black" },
+        { name: "RWC SAN BERNARDINO - CHRIS", coords: [34.05846457072466, -117.28503739464134], color: "black" },
+
+        ],
+
+        "JB":[
+        { name: "JB CHATSWORTH - FRANK", coords: [34.23504730123267, -118.59975938619546], color: "orange" },
+        { name: "JB POMONA - RENE", coords: [34.03511459991059, -117.73124565282559], color: "orange" },
+        { name: "JB HESPERIA - JACOB", coords: [34.45455988412601, -117.28664961247395], color: "orange" },
+        { name: "JB SANTA BARBARA - JACOB", coords: [34.418955663992605, -119.6838585083952], color: "orange" },
+        { name: "JB SUN VALLEY - JACOB", coords: [34.226974260112534, -118.37295518236168], color: "orange" },
+        { name: "JB VENTURA - JACOB", coords: [34.257162039785285, -119.24464316607916], color: "orange" },
+        { name: "JB SIMI VALLEY - JACOB", coords: [34.27262146158218, -118.69931691206412], color: "orange" },
+        { name: "JB SANTA ANA - JACOB", coords: [33.750119844453046, -117.8538315427201], color: "orange" },
+        { name: "JB CARSON - JACOB", coords: [33.86677090168222, -118.28109332879772], color: "orange" },
+        { name: "JB BURBANK - JACOB", coords: [34.18126416755826, -118.31992848065163], color: "orange" },
+        { name: "JB RIVERSIDE - BRANDON", coords: [34.006811496057125, -117.34034442638027], color: "orange" },
+        { name: "JB SANTA FE SPRINGS - BRANDON", coords: [33.932067236303745, -118.05309875340737], color: "orange" },
+        { name: "JB MURIETTA - KAILA", coords: [33.547550357347184, -117.1887610983398], color: "orange" },
+        // NOT AVAILABLE ON MAPS, LOOK UP { name: "JB SAN DIEGO - KAILA", coords: [33.547550357347184, -117.1887610983398], color: "black" },
+        { name: "JB LA MESA - ALEX", coords: [32.77455322878181, -117.01999643206977], color: "orange" },
+        { name: "JB PASADENA - SOPHIA", coords: [34.12702705680617, -118.15050919459566], color: "orange" },
+        { name: "JB SIMI VALLEY - SOPHIA", coords: [34.27261543480502, -118.69926454500643], color: "orange" },
+        { name: "JB ANAHEIM - SOPHIA", coords: [33.860538157632355, -117.86390655818012], color: "orange" },
+        { name: "JB BURBANK - SOPHIA", coords: [34.181261882857925, -118.31993205651516], color: "orange" },
+        { name: "JB SUN VALLEY - SOPHIA", coords: [34.227581287432436, -118.37337570318248], color: "orange" },
+        { name: "JB GARDENA - JUSTIN", coords: [33.89587703356654, -118.2751718884697], color: "orange" },
+        { name: "JB CANYON COUNTRY - DYLAN", coords: [34.43972318839025, -118.42999868429405], color: "orange" },
+        { name: "JB LANCASTER - DYLAN", coords: [34.70967137323588, -118.17251471638946], color: "orange" },
+        { name: "JB SAN BERNARDINO - CHRIS", coords: [34.09953311963351, -117.29125067910404], color: "orange" },
+
+        ],
+
+        "H & R ROOFING":[
+        { name: "H & R ROOFING - JACOB", coords: [34.25247522617545, -119.16407693259922], color: "magenta" },
+
+        ],
+
+        "UNITED ROOFING SUPPLY":[
+        { name: "UNITED ROOFING SUPPLY - RENE", coords: [33.98828080848185, -118.28248746510637], color: "purple" },
+
+        ],
+
+        "ELITE":[
+        { name: "ELITE LYNWOOD - FRANK", coords: [33.917378714821105, -118.18217698081325], color: "green" },
+        { name: "ELITE NORCO - FRANK", coords: [33.9207620961467, -117.55780171509934], color: "green" },
+        { name: "ELITE SAN JUAN CAPISTRANO - KAILA", coords: [33.48276269903557, -117.67465873473638], color: "green" },
+        { name: "ELITE NOHO - DYLAN", coords: [34.205418262761256, -118.41443914316827], color: "green" },
+
+        ],
+
+        "GULFEAGLE":[
+        { name: "GULFEAGLE PACOIMA - DYLAN", coords: [34.266917304017575, -118.42209786085225], color: "turquoise" },
+       
+        ],
+
+        "SHUNDE":[
+        { name: "SHUNDE - FRANK", coords: [34.05261854784608, -118.00076444916482], color: "grey" },
+     
+        ],
+      
+      
+    //  "Frank":[ //RED
+    //     { name: "ABC WHITTIER - FRANK", coords: [33.91727003572164, -118.04312176551576], color: "red" },
+    //     { name: "ABC ANAHEIM - FRANK", coords: [33.81117541732508, -117.89404738641242], color: "red" },
+    //     { name: "ABC MONROVIA - FRANK", coords: [34.108242402336714, -118.00701296835695], color: "red" },
+    //     { name: "ABC ONTARIO - FRANK", coords: [34.05672305518711, -117.67731001374659], color: "red" },
+    //     { name: "JB CHATSWORTH - FRANK", coords: [34.23504730123267, -118.59975938619546], color: "red" },
+    //     { name: "ELITE LYNWOOD - FRANK", coords: [33.917378714821105, -118.18217698081325], color: "red" },
+    //     { name: "ELITE NORCO - FRANK", coords: [33.9207620961467, -117.55780171509934], color: "red" },
+    //     { name: "SHUNDE - FRANK", coords: [34.05261854784608, -118.00076444916482], color: "red" },
+
+    //     ],
+
+    //     "Rene":[ //BLUE
+    //     { name: "BEACON PICO RIVERA - RENE", coords: [33.97198552053776, -118.11885330783373], color: "blue" },
+    //     { name: "BEACON ORANGE - RENE", coords: [33.798368962593955, -117.861458244301], color: "blue" },
+    //     { name: "BEACON SANTA ANA - RENE", coords: [33.71034808177012, -117.91363084614478], color: "blue" },
+    //     { name: "BEACON LONG BEACH - RENE", coords: [33.81406920129267, -118.17606524016703], color: "blue" },
+    //     { name: "BEACON ANAHEIM - RENE", coords: [33.85235561398197, -117.9187736134279], color: "blue" },
+    //     { name: "JB AZUSA - RENE", coords: [34.11237310566773, -117.9245543514048], color: "blue" },
+    //     { name: "JB POMONA - RENE", coords: [34.03511459991059, -117.73124565282559], color: "blue" },
+    //     { name: "UNITED ROOFING SUPPLY - RENE", coords: [33.98828080848185, -118.28248746510637], color: "blue" },
+
+    //     ],
+
+    //     "Jacob":[ //ORANGE
+    //     { name: "ABC LA - JACOB", coords: [34.01745625903378, -118.20926484978443], color: "orange" },
+    //     { name: "ABC OXNARD - JACOB", coords: [34.2565439437123, -119.16395881057497], color: "orange" },
+    //     { name: "BEACON OXNARD - JACOB", coords: [34.229213729973004, -119.16891496065135], color: "orange" },
+    //     { name: "JB HESPERIA - JACOB", coords: [34.45455988412601, -117.28664961247395], color: "orange" },
+    //     { name: "JB SANTA BARBARA - JACOB", coords: [34.418955663992605, -119.6838585083952], color: "orange" },
+    //     { name: "JB SUN VALLEY - JACOB", coords: [34.226974260112534, -118.37295518236168], color: "orange" },
+    //     { name: "JB VENTURA - JACOB", coords: [34.257162039785285, -119.24464316607916], color: "orange" },
+    //     { name: "JB SIMI VALLEY - JACOB", coords: [34.27262146158218, -118.69931691206412], color: "orange" },
+    //     { name: "JB SANTA ANA - JACOB", coords: [33.750119844453046, -117.8538315427201], color: "orange" },
+    //     { name: "JB CARSON - JACOB", coords: [33.86677090168222, -118.28109332879772], color: "orange" },
+    //     { name: "JB BURBANK - JACOB", coords: [34.18126416755826, -118.31992848065163], color: "orange" },
+    //     { name: "H & R ROOFING - JACOB", coords: [34.25247522617545, -119.16407693259922], color: "orange" },
+
+    //     ],
+
+    //     "Brandon":[ //BLACK
+    //     { name: "ABC GARDENA - BRANDON", coords: [33.856713004737664, -118.28191801179422], color: "black" },
+    //     { name: "ABC LA MIRADA - BRANDON", coords: [33.88206925347275, -118.01344322704236], color: "black" },
+    //     { name: "JB RIVERSIDE - BRANDON", coords: [34.006811496057125, -117.34034442638027], color: "black" },
+    //     { name: "JB SANTA FE SPRINGS - BRANDON", coords: [33.932067236303745, -118.05309875340737], color: "black" },
+    //     { name: "RWC LAKE ELSINORE - BRANDON", coords: [33.68433821547334, -117.33345079396632], color: "black" },
+
+    //     ],
+
+    //     "Kaila":[ //BEIGE
+    //     { name: "BEACON VISTA - KAILA", coords: [33.15182820501515, -117.23038564555002], color: "beige" },
+    //     { name: "RWC SAN MARCOS - KAILA", coords: [33.13806398623284, -117.19701564555054], color: "beige" },
+    //     { name: "JB MURIETTA - KAILA", coords: [33.547550357347184, -117.1887610983398], color: "beige" },
+    //     NOT AVAILABLE ON MAPS, LOOK UP { name: "JB SAN DIEGO - KAILA", coords: [33.547550357347184, -117.1887610983398], color: "black" },
+    //     { name: "SRS VISTA - KAILA", coords: [33.20703048619685, -117.25126817438357], color: "beige" },
+    //     { name: "ABC PALM DESERT - KAILA", coords: [33.798963534159896, -116.3802009202898], color: "beige" },
+    //     { name: "ELITE SAN JUAN CAPISTRANO - KAILA", coords: [33.48276269903557, -117.67465873473638], color: "beige" },
+    //     { name: "RWC PALM DESERT - KAILA", coords: [33.838786104532964, -116.50780433203204], color: "beige" },
+
+    //     ],
+
+    //     "Alex":[ //PURPLE
+    //     { name: "ABC SAN DIEGO - ALEX", coords: [32.83543434123462, -117.16184443523142], color: "purple" },
+    //     { name: "ABC EL CAJON - ALEX", coords: [32.798024456748585, -116.97282334704221], color: "purple" },
+    //     { name: "ABC SAN MARCOS - ALEX", coords: [33.14335219384722, -117.15326909307619], color: "purple" },
+    //     BEACON? { name: "BEACON POWAY - ALEX", coords: [33.151649260329116, -117.23038818852004], color: "purple" },
+    //     { name: "BEACON SAN DIEGO - ALEX", coords: [32.83759177546331, -117.13583955871516], color: "purple" },
+    //     { name: "BEACON EL CAJON - ALEX", coords: [32.798168180399, -116.97402594716918], color: "purple" },
+    //     { name: "RWC SPRING VALLEY - ALEX", coords: [32.71558911511767, -117.0115648033488], color: "purple" },
+    //     { name: "JB LA MESA - ALEX", coords: [32.77455322878181, -117.01999643206977], color: "purple" },
+    //     { name: "SRS SAN DIEGO - ALEX", coords: [32.88254248211888, -117.19646433206589], color: "purple" },
+
+    //     ],
+
+    //     "Sophia":[ //GREEN
+    //     { name: "JB PASADENA - SOPHIA", coords: [34.12702705680617, -118.15050919459566], color: "green" },
+    //     { name: "JB SIMI VALLEY - SOPHIA", coords: [34.27261543480502, -118.69926454500643], color: "green" },
+    //     { name: "JB ANAHEIM - SOPHIA", coords: [33.860538157632355, -117.86390655818012], color: "green" },
+    //     { name: "JB BURBANK - SOPHIA", coords: [34.181261882857925, -118.31993205651516], color: "green" },
+    //     { name: "JB SUN VALLEY - SOPHIA", coords: [34.227581287432436, -118.37337570318248], color: "green" },
+
+    //     ],
+
+    //     "Justin":[ //TURQOISE
+    //     { name: "BEACON GARDENA - JUSTIN", coords: [33.902229491831704, -118.31124771807694], color: "turquoise" },
+    //     { name: "BEACON VAN NUYS - JUSTIN", coords: [34.214094161860174, -118.46436363887094], color: "turquoise" },
+    //     { name: "BEACON LOS ANGELES - JUSTIN", coords: [33.989793347977354, -118.29633936954274], color: "turquoise" },
+    //     { name: "BEACON ROSEMEAD - JUSTIN", coords: [34.0623870124969, -118.07999357938034], color: "turquoise" },
+    //     { name: "JB GARDENA - JUSTIN", coords: [33.89587703356654, -118.2751718884697], color: "turquoise" },
+    //     { name: "ABC GARDENA (182nd) - JUSTIN", coords: [33.870733467119415, -118.28252484590723], color: "turquoise" },
+
+    //     ],
+
+    //     "Dylan":[ //MAGENTA
+    //     { name: "ABC CHATSWORTH - DYLAN", coords: [34.24124523145087, -118.57172190809325], color: "magenta" },
+    //     { name: "ELITE NOHO - DYLAN", coords: [34.205418262761256, -118.41443914316827], color: "magenta" },
+    //     { name: "BEACON SUN VALLEY - DYLAN", coords: [34.24357949425157, -118.38843652691368], color: "magenta" },
+    //     { name: "JB CANYON COUNTRY - DYLAN", coords: [34.43972318839025, -118.42999868429405], color: "magenta" },
+    //     { name: "GULFEAGLE PACOIMA - DYLAN", coords: [34.266917304017575, -118.42209786085225], color: "magenta" },
+    //     { name: "JB LANCASTER - DYLAN", coords: [34.70967137323588, -118.17251471638946], color: "magenta" },
+    //     INCLUSION OF IHK? ASK
+
+
+    //     ],
+
+    //     "Chris":[ //"rgb(128, 83, 0)"
+    //     { name: "ABC RIVERSIDE - CHRIS", coords: [33.994180691443084, -117.36607430635078], color: "rgb(128, 83, 0)" },
+    //     { name: "ABC SAN BERNARDINO - CHRIS", coords: [34.07618801176381, -117.27570594993475], color: "rgb(128, 83, 0)" },
+    //     { name: "BEACON SAN BERNARDINO - CHRIS", coords: [34.07323119894079, -117.27813444736564], color: "rgb(128, 83, 0)" },
+    //     { name: "BEACON RIVERSIDE - CHRIS", coords: [33.98772768999759, -117.3608707361576], color: "rgb(128, 83, 0)" },
+    //     { name: "RWC PLACENTIA - CHRIS", coords: [33.865232265235264, -117.83334193505331], color: "rgb(128, 83, 0)" },
+    //     { name: "RWC SAN BERNARDINO - CHRIS", coords: [34.05846457072466, -117.28503739464134], color: "rgb(128, 83, 0)" },
+    //     { name: "JB SAN BERNARDINO - CHRIS", coords: [34.09953311963351, -117.29125067910404], color: "rgb(128, 83, 0)" },
+
+
+    //     ],
+      
+    };
+
+    const allMarkers = [];
+
+    function showCities(county) {
+      allMarkers.forEach(marker => map.removeLayer(marker));
+      allMarkers.length = 0;
+
+      const cities = countyCityData[county] || [];
+      if (cities.length === 0) return;
+
+      const group = [];
+
+      cities.forEach(city => {
+        const icon = L.divIcon({
+          className: '',
+          html: `<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='${city.color}' stroke='black' stroke-width='2'/></svg>`
+        });
+
+        const marker = L.marker(city.coords, { icon })
+          .addTo(map)
+          .bindPopup(`<strong>${city.name}</strong>`);
+
+        allMarkers.push(marker);
+        group.push(marker);
+      });
+
+      const bounds = L.featureGroup(group).getBounds();
+      map.fitBounds(bounds);
+    }
+
+    // Populate county list in legend
+    const countyList = document.getElementById('county-list');
+    Object.keys(countyCityData).forEach(county => {
+      const li = document.createElement('li');
+      li.textContent = county;
+      li.addEventListener('click', () => showCities(county));
+      countyList.appendChild(li);
+    });
+
+    // Load county boundaries
+    fetch('https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/california-counties.geojson')
+      .then(res => res.json())
+      .then(data => {
+        const geojsonLayer = L.geoJSON(data, {
+          style: {
+            color: '#444',
+            weight: 1,
+            fillColor: '#66b3ff',
+            fillOpacity: 0.4
+          },
+          onEachFeature: function (feature, layer) {
+            layer.on({
+              click: function (e) {
+                map.fitBounds(e.target.getBounds());
+              }
+            });
+            layer.bindPopup(`<strong>${feature.properties.name}</strong>`);
+          }
+        }).addTo(map);
+      });
+  </script>
+</body>
+</html>
